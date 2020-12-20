@@ -1,0 +1,123 @@
+---
+title: "impeachment_attitudes"
+author: "Diego Mendoza"
+date: "12/20/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+impeach <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRh8d5JaDqBtByzNw2JZF3idaACobDhhk-p7chJoktA0HawELHFOvjQOqCpzGA4MGONvPlR7GASqW-K/pub?gid=1765341510&single=true&output=csv")
+
+```
+
+## 1) The column "for_impeachment" indicates whether the member has publicly called for an impeachment inquiry. Filter to return only the ones where the answer is NO.    
+
+I'm filtering from the data and telling R to only show me results with anything in that column that is labeled "NO"
+
+
+
+```{r}
+impeach %>% 
+  filter(for_impeachment=="NO")
+
+```
+
+## 2) Filter to return only results where a member is both against impeachment, and comes from a district that President Trump won in 2016 (which is noted in the "p16winningparty" column)
+
+The same concept is applied from above, only this time also incorporating the other variable.
+
+```{r}
+impeach %>% 
+  filter(for_impeachment=="NO",
+         p16winningparty=="R")
+
+```
+
+## 3) Filter for only results where a member is against impeachment, comes from a district that President Trump won in 2016 (which is noted in the "p16winningparty" column), and also comes from a district that Mitt Romney won in 2012 ("p12winningparty").
+
+Again, I use the same concept as above.
+
+```{r}
+impeach %>% 
+  filter(for_impeachment=="NO",
+         p16winningparty=="R",
+         p12winningparty=="R")
+```
+
+
+## 4) Filter for only results from September 2019 where a member is a YES for impeachment.
+For dates, I would've created a new variable as to filter between month and year, but that has already been done.
+
+```{r}
+impeach %>% 
+  filter(for_impeachment=="YES",
+         date_year==2019,
+         date_month==9)
+```
+
+## 5) Filter for only results where a member is a YES for impeachment and is from a district where Clinton won more than 70 percent of the vote in 2016 (found in column "clinton_percent").
+
+```{r}
+impeach %>% 
+  filter(for_impeachment=="YES",
+         clinton_percent>60)
+```
+
+## 6) Sort the entire dataframe based on the percentage of a district that has a bachelor's degree or higher ("pct_bachelors"), from lowest to highest
+
+```{r}
+impeach %>% 
+  arrange(desc(pct_bachelors))
+```
+
+
+## 7) Sort the just those who are NO on impeachment based on the percentage of a district that has a bachelor's degree or higher ("pct_bachelors"), from lowest to highest.
+
+```{r}
+impeach %>% 
+  filter(for_impeachment=="NO") %>% 
+  arrange(desc(pct_bachelors))
+```
+
+## 8) Sort the just those who are NO on impeachment based on the percentage of a district that has a bachelor's degree or higher ("pct_bachelors"), from lowest to highest. Then filter those records by only those whose bachelor's percentage is below the national average (found in the "pct_bachelors_compared_to_national" column).
+
+```{r}
+no_impeachment_bachsorted<-impeach %>% 
+  filter(for_impeachment=="NO") %>% 
+  arrange(desc(pct_bachelors))
+
+
+no_impeachment_bachsorted %>% 
+  filter(pct_bachelors_compared_to_national=="BELOW")
+```
+
+## 9) Filter for only members from New Jersey who are NO on impeachment
+
+```{r}
+impeach %>% 
+  filter(for_impeachment=="NO",
+         state=="NJ")
+```
+
+## 10) Filter for those who were YES on impeachment, with a declared date prior to 2019. So only those with dates before 2019.  Then sort those so that the highest Clinton vote percentages are at the top. 
+
+```{r}
+impeach %>% 
+  filter(for_impeachment=="YES",
+         date_year<2019) %>% 
+  arrange(desc(clinton_percent))
+```
+
+## 11) Answer this question with a single numeric answer, and show the R code you used to reach that answer: How many members in the dataset who are holdouts on impeachment comes from districts with a GDP below the national figure?
+
+```{r}
+impeach %>% 
+  filter(for_impeachment=="NO") %>% 
+  count(gdp_above_national)
+```
+19 members are against impeachment and come from a district below national GDP avg. 
+
+
